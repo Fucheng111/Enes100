@@ -25,7 +25,7 @@ void setup() {
 }
 
 void loop() {
-	facingLeft();
+	facinUp();
 }
 
 void location(){
@@ -72,13 +72,13 @@ void facingLeft(){
 }
 
 void facingUp(){
-	while(theta > 1.52 && theta < 1.66 ){
+	while(theta > 1.52 && theta < 1.62 ){
 		location();
-		if(theta > 0.05 && theta <= 3.14){
+		if(theta >= -1.57 && theta < 1.57){
 			Tank.setLeftMotorPWM(-255);
 			Tank.setRightMotorPWM(255);
 		
-		}else if(theta >= -3.14 && theta <= -0.05){
+		}else if(theta >= 1.57 && theta <= 3.14 && theta >=3.14 && theta < -1.57){
 			Tank.setLeftMotorPWM(255);
 			Tank.setRightMotorPWM(-255);
 		}
@@ -87,6 +87,24 @@ void facingUp(){
 	Tank.setLeftMotorPWM(0);
 	Tank.setRightMotorPWM(0);
 }
+
+void facingDown(){
+	while(theta <-1.52 && theta > -1.62 ){
+		location();
+		if(theta >= -1.57 && theta < 1.57){
+			Tank.setLeftMotorPWM(255);
+			Tank.setRightMotorPWM(-255);
+		
+		}else if(theta >= 1.57 && theta <= 3.14 && theta >=3.14 && theta < -1.57){
+			Tank.setLeftMotorPWM(-255);
+			Tank.setRightMotorPWM(255);
+		}
+	}
+	
+	Tank.setLeftMotorPWM(0);
+	Tank.setRightMotorPWM(0);
+}
+
 
 bool facingTarget(){
 	
