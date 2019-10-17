@@ -8,7 +8,6 @@ double theta;
 double lin_velocity;
 double destination_x;
 double destination_y;
-bool right_x;
 bool faceTarget;
 	
 void setup() {
@@ -21,24 +20,12 @@ void setup() {
  	 }
 	destination_x= Enes100.destination.x; 
 	destination_y= Enes100.destination.y; 
-	right_x = false;
+
 	faceTarget = false;
 }
 
 void loop() {
-	right_x = facingRight();
-	
-	if(facingTarget()){
-		Tank.setLeftMotorPWM(0);
-		Tank.setRightMotorPWM(0);
-	}
-	
-	
-	
-	while(fabs(destination_x - x) >0.5){
-		Tank.setLeftMotorPWM(255);
-		Tank.setRightMotorPWM(255);
-	}
+	facingLeft();
 }
 
 void location(){
@@ -49,27 +36,56 @@ void location(){
   	}
 }
 
-bool facingRight(){
-	location();
+void facingRight(){
+	while (fabs(theta) < 0.05){
+		location();
+		if(theta > 0.05 && theta <= 3.14){
+			Tank.setLeftMotorPWM(255);
+			Tank.setRightMotorPWM(-255);
+
+		}
+		else if(theta >= -3.14 && theta <= -0.05){
+			Tank.setLeftMotorPWM(-255);
+			Tank.setRightMotorPWM(255);
+		}
+	}
+	Tank.setLeftMotorPWM(0);
+	Tank.setRightMotorPWM(0);
 	
-	bool right = false;
-	
-	if(theta > 0.05 && theta <= 3.14){
-		Tank.setLeftMotorPWM(255);
-		Tank.setRightMotorPWM(-255);
+}
+
+void facingLeft(){
+	while(fabs(theta)>3){
+		location();
+		if(theta > 0.05 && theta <= 3.14){
+			Tank.setLeftMotorPWM(-255);
+			Tank.setRightMotorPWM(255);
 		
-  	}
-  	else if(theta >= -3.14 && theta <= -0.05){
-		Tank.setLeftMotorPWM(-255);
-		Tank.setRightMotorPWM(255);
-  	}
-  	else{
-		Tank.setLeftMotorPWM(0);
-		Tank.setRightMotorPWM(0);
-		right = true;
-  	}
+		}else if(theta >= -3.14 && theta <= -0.05){
+			Tank.setLeftMotorPWM(255);
+			Tank.setRightMotorPWM(-255);
+		}
+	}
 	
-	return right;
+	Tank.setLeftMotorPWM(0);
+	Tank.setRightMotorPWM(0);
+}
+
+void facingUp(){
+	while(theta > 1.52 && theta < 1.66 ){
+		location();
+		if(theta > 0.05 && theta <= 3.14){
+			Tank.setLeftMotorPWM(-255);
+			Tank.setRightMotorPWM(255);
+		
+		}else if(theta >= -3.14 && theta <= -0.05){
+			Tank.setLeftMotorPWM(255);
+			Tank.setRightMotorPWM(-255);
+		}
+	}
+	
+	Tank.setLeftMotorPWM(0);
+	Tank.setRightMotorPWM(0);
 }
 
 bool facingTarget(){
@@ -79,11 +95,6 @@ bool facingTarget(){
 	
 	double  beta = atan2 (y_diff, x_diff);
 	bool faceTarget = false;
-	
-	Enes100.print("theta");
-	Enes100.println(theta);
-	Enes100.println(beta);
-
 	
 	if(beta >=0){
 		
@@ -107,6 +118,16 @@ bool facingTarget(){
 }
 
 void avoid_obstacles(){
-	
+	if(Tank.readDistanceSensor(0) < 0.1){
+		if((2- Enes100.location.y) <=0.3){
+			
+		}else if(Enes100.location.y <= 0.3){
+			
+		}else{
+			
+		}
+	}else if(Tank.readDistanceSensor(0) < 0.1){
+		
+	}
 }
 
