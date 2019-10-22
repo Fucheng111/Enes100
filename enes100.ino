@@ -25,7 +25,24 @@ void setup() {
 }
 
 void loop() {
-	facinUp();
+	if(sqrt(pow(destination_x-x,2)+pow(destination_y-y,2)) >= 0.1){
+		if(obstacle_Detection_right()||obstacle_Detection_left()){
+			avoid_obstacles();
+		}
+		if(faceTarget){
+			Tank.setLeftMotorPWM(255);
+			Tank.setRightMotorPWM(255);
+		}else{
+			facingTarget();
+			Tank.setLeftMotorPWM(255);
+			Tank.setRightMotorPWM(255);
+		}
+	}else{
+		Tank.setLeftMotorPWM(0);
+		Tank.setRightMotorPWM(0);
+		
+	}
+
 }
 
 void location(){
@@ -135,17 +152,273 @@ bool facingTarget(){
 	return faceTarget;
 }
 
+bool obstacle_Detection_right(){
+	if(Tank.readDistanceSensor(2) <0.1){
+		return true;
+	}
+	
+	return false;
+}
+
+bool obstacle_Detection_left(){
+	if(Tank.readDistanceSensor(0) <0.1){
+		return true;
+	}
+	
+	return false;
+}
+
 void avoid_obstacles(){
-	if(Tank.readDistanceSensor(0) < 0.1){
-		if((2- Enes100.location.y) <=0.3){
-			
-		}else if(Enes100.location.y <= 0.3){
+	if(obstacle_Detection_left()){
+		Tank.setLeftMotorPWM(0);
+		Tank.setRightMotorPWM(0);
+		location();
+		
+		faceTarget = false;
+		if((2- y) <=0.3){
+			facingDown();
+			if(obstacle_Detection_left() || obstacle_Detection_right()){
+				facingLeft();
+				double width = x - 0.25;
+				while(x > width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingDown();
+				double length = y - 0.55;
+				while(y > length){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingRight();
+			 	width = x + 0.25;
+				while(x < width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+			}else{
+				double length = y - 0.55;
+				while(y > length){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingRight();
+			 	double width = x + 0.25;
+				while(x < width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+			}
+		}else if(y <= 0.3){
+			facingUp();
+			if(obstacle_Detection_left() || obstacle_Detection_right()){
+				facingLeft();
+				double width = x - 0.25;
+				while(x > width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingUp();
+				double length = y - 0.55;
+				while(y > length){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingRight();
+			 	width = x + 0.25;
+				while(x < width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+			}else{
+				double length = y - 0.55;
+				while(y > length){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingRight();
+			 	double width = x + 0.25;
+				while(x < width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+			}
 			
 		}else{
-			
+			facingDown();
+			double length = y - 0.25;
+			while(y > length){
+				Tank.setLeftMotorPWM(255);
+				Tank.setRightMotorPWM(255);
+				location();
+			}
+			Tank.setLeftMotorPWM(0);
+			Tank.setRightMotorPWM(0);
+			facingRight();
+			double width = x + 0.25;
+			while(x < width){
+				Tank.setLeftMotorPWM(255);
+				Tank.setRightMotorPWM(255);
+				location();
+			}
+			Tank.setLeftMotorPWM(0);
+			Tank.setRightMotorPWM(0);
 		}
-	}else if(Tank.readDistanceSensor(0) < 0.1){
+	}else if(obstacle_Detection_right()){
+		Tank.setLeftMotorPWM(0);
+		Tank.setRightMotorPWM(0);
+		location();
 		
+		faceTarget = false;
+		if((2- y) <=0.3){
+			facingDown();
+			if(obstacle_Detection_left() || obstacle_Detection_right()){
+				facingLeft();
+				double width = x - 0.25;
+				while(x > width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingDown();
+				double length = y - 0.55;
+				while(y > length){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingRight();
+			 	width = x + 0.25;
+				while(x < width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+			}else{
+				double length = y - 0.55;
+				while(y > length){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingRight();
+			 	double width = x + 0.25;
+				while(x < width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+			}
+		}else if(y <= 0.3){
+			facingUp();
+			if(obstacle_Detection_left() || obstacle_Detection_right()){
+				facingLeft();
+				double width = x - 0.25;
+				while(x > width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingUp();
+				double length = y + 0.55;
+				while(y < length){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingRight();
+			    width = x + 0.25;
+				while(x < width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+			}else{
+				double length = y - 0.55;
+				while(y > length){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+				facingRight();
+			 	double width = x + 0.25;
+				while(x < width){
+					Tank.setLeftMotorPWM(255);
+					Tank.setRightMotorPWM(255);
+					location();
+				}
+				Tank.setLeftMotorPWM(0);
+				Tank.setRightMotorPWM(0);
+			}
+			
+		}else{
+			facingUp();
+			double length = y + 0.25;
+			while(y < length){
+				Tank.setLeftMotorPWM(255);
+				Tank.setRightMotorPWM(255);
+				location();
+			}
+			Tank.setLeftMotorPWM(0);
+			Tank.setRightMotorPWM(0);
+			facingRight();
+			double width = x + 0.25;
+			while(x < width){
+				Tank.setLeftMotorPWM(255);
+				Tank.setRightMotorPWM(255);
+				location();
+			}
+			Tank.setLeftMotorPWM(0);
+			Tank.setRightMotorPWM(0);
+		}
 	}
 }
 
