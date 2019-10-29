@@ -1,5 +1,5 @@
-#include "Enes100.h"
-#include "Tank.h"
+#include "Enes100Simulation.h"
+#include "TankSimulation.h"
 #include <math.h>
 
 double x;
@@ -8,118 +8,279 @@ double theta;
 double lin_velocity;
 double destination_x;
 double destination_y;
+double beta;
+
 bool faceTarget;
-	
+bool faceRight;
+bool faceLeft;
+bool faceUp;
+bool faceDown;
+bool forceStop;
+
+
 void setup() {
-	Enes100.begin("Aqua Terps", WATER, 3, 8, 9);
-	Tank.begin();
-	if(Enes100.updateLocation()){
-	  theta = Enes100.location.theta;
-	  x = Enes100.location.x;
-	  y = Enes100.location.y;
- 	 }
-	destination_x= Enes100.destination.x; 
-	destination_y= Enes100.destination.y; 
+	Enes100Simulation.begin();
+	TankSimulation.begin();
+	location();
+	destination_x= Enes100Simulation.destination.x; 
+	destination_y= Enes100Simulation.destination.y; 
 
 	faceTarget = false;
+  faceRight =false;
+  faceLeft = false;
+  faceUp = false;
+  faceDown = false;
+  forceStop = false;
+  
 }
 
 void loop() {
-	if(sqrt(pow(destination_x-x,2)+pow(destination_y-y,2)) >= 0.1){
-		if(obstacle_Detection_right()||obstacle_Detection_left()){
-			avoid_obstacles();
-		}
-		if(faceTarget){
-			Tank.setLeftMotorPWM(255);
-			Tank.setRightMotorPWM(255);
-		}else{
-			facingTarget();
-			Tank.setLeftMotorPWM(255);
-			Tank.setRightMotorPWM(255);
-		}
-	}else{
-		Tank.setLeftMotorPWM(0);
-		Tank.setRightMotorPWM(0);
-		
-	}
 
-}
+ 
+  if(facingTarget()){
+       
+   Enes100Simulation.println("Starts");
+   while(!(obstacle_Detection_right()||obstacle_Detection_left())){
+        Enes100Simulation.println("No Obstacles");
+    		TankSimulation.setLeftMotorPWM(255);
+    		TankSimulation.setRightMotorPWM(255);
+        location();
+       if(sqrt(pow(destination_x-x,2)+pow(destination_y-y,2)) <= 0.15){
+          TankSimulation.setLeftMotorPWM(0);
+          TankSimulation.setRightMotorPWM(0);
+          while(1){
+            
+          }
+       }
+   }
+  
+   
+   TankSimulation.setLeftMotorPWM(0);
+   TankSimulation.setRightMotorPWM(0);
+   location();
+   avoid_obstacles();
+  }else{
+    TankSimulation.setLeftMotorPWM(255);
+    TankSimulation.setRightMotorPWM(255);
+    delay(1000);
+    TankSimulation.setLeftMotorPWM(0);
+    TankSimulation.setRightMotorPWM(0);
+  }
+  
+
+ 
+ 
+   
+    
+ }
+  
+
 
 void location(){
-	if(Enes100.updateLocation()){
-	  theta = Enes100.location.theta;
-	  x = Enes100.location.x;
-	  y = Enes100.location.y;
+	if(Enes100Simulation.updateLocation()){
+	  theta = Enes100Simulation.location.theta;
+	  x = Enes100Simulation.location.x;
+	  y = Enes100Simulation.location.y;
   	}
 }
 
-void facingRight(){
-	while (fabs(theta) < 0.05){
+bool facingRight(){
+  long time = millis();
+  location();
+	while (fabs(theta) > 0.01){
 		location();
 		if(theta > 0.05 && theta <= 3.14){
-			Tank.setLeftMotorPWM(255);
-			Tank.setRightMotorPWM(-255);
+			TankSimulation.setLeftMotorPWM(255);
+			TankSimulation.setRightMotorPWM(-255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
 
 		}
-		else if(theta >= -3.14 && theta <= -0.05){
-			Tank.setLeftMotorPWM(-255);
-			Tank.setRightMotorPWM(255);
+		else if (theta < -0.05 && theta >= -3.14){
+			TankSimulation.setLeftMotorPWM(-255);
+			TankSimulation.setRightMotorPWM(255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+		}else{
+      TankSimulation.setLeftMotorPWM(-255);
+      TankSimulation.setRightMotorPWM(255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
 		}
+   
+   if((millis() -time) >= 10000){
+     TankSimulation.setLeftMotorPWM(-255);
+      TankSimulation.setRightMotorPWM(-255);
+      delay(500);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+      faceRight = false;
+      return false;
+   }
+
+    
+    
 	}
-	Tank.setLeftMotorPWM(0);
-	Tank.setRightMotorPWM(0);
+	TankSimulation.setLeftMotorPWM(0);
+	TankSimulation.setRightMotorPWM(0);
+  faceRight = true;
+  
+  faceTarget = false;
+  faceLeft = false;
+  faceUp = false;
+  faceDown = false;
+  
+  return true;
 	
 }
 
-void facingLeft(){
-	while(fabs(theta)>3){
-		location();
+bool facingLeft(){
+  long time = millis();
+  location();
+	while(fabs(theta)<3){
+  
+    location();
 		if(theta > 0.05 && theta <= 3.14){
-			Tank.setLeftMotorPWM(-255);
-			Tank.setRightMotorPWM(255);
+			TankSimulation.setLeftMotorPWM(-255);
+			TankSimulation.setRightMotorPWM(255);
+     delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
 		
 		}else if(theta >= -3.14 && theta <= -0.05){
-			Tank.setLeftMotorPWM(255);
-			Tank.setRightMotorPWM(-255);
+			TankSimulation.setLeftMotorPWM(255);
+			TankSimulation.setRightMotorPWM(-255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
 		}
+   else{
+      TankSimulation.setLeftMotorPWM(255);
+      TankSimulation.setRightMotorPWM(-255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+   }
+   if((millis() -time) >= 10000){
+    TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+      return false;
+   }
+ 
+    
+   
 	}
-	
-	Tank.setLeftMotorPWM(0);
-	Tank.setRightMotorPWM(0);
+
+	TankSimulation.setLeftMotorPWM(0);
+	TankSimulation.setRightMotorPWM(0);
+  faceLeft = true;
+
+  faceTarget = false;
+  faceRight =false;
+  faceUp = false;
+  faceDown = false;
+  return true;
 }
 
-void facingUp(){
-	while(theta > 1.52 && theta < 1.62 ){
+bool facingUp(){
+  
+  long time = millis();
+  location();
+	while(theta < 1.56 || theta > 1.58 ){
 		location();
 		if(theta >= -1.57 && theta < 1.57){
-			Tank.setLeftMotorPWM(-255);
-			Tank.setRightMotorPWM(255);
+			TankSimulation.setLeftMotorPWM(-255);
+			TankSimulation.setRightMotorPWM(255);
+     delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
 		
-		}else if(theta >= 1.57 && theta <= 3.14 && theta >=3.14 && theta < -1.57){
-			Tank.setLeftMotorPWM(255);
-			Tank.setRightMotorPWM(-255);
+		}else if((theta >= 1.57 && theta <= 3.14 )|| (theta >=-3.14 && theta < -1.57)){
+			TankSimulation.setLeftMotorPWM(255);
+			TankSimulation.setRightMotorPWM(-255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+		}else{
+      TankSimulation.setLeftMotorPWM(255);
+      TankSimulation.setRightMotorPWM(-255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
 		}
+   if((millis() -time) >= 10000){
+    TankSimulation.setLeftMotorPWM(-255);
+          TankSimulation.setRightMotorPWM(-255);
+          delay(500);
+    TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+      return false;
+   }
+   
 	}
 	
-	Tank.setLeftMotorPWM(0);
-	Tank.setRightMotorPWM(0);
+	TankSimulation.setLeftMotorPWM(0);
+	TankSimulation.setRightMotorPWM(0);
+ 
+  faceUp = true;
+  faceTarget = false;
+  faceRight =false;
+  faceLeft = false;
+  faceDown = false;
+
+  return true;
 }
 
-void facingDown(){
-	while(theta <-1.52 && theta > -1.62 ){
+bool facingDown(){
+  long time = millis();
+  location();
+	while(theta > -1.56 || theta < -1.58 ){
 		location();
+   
 		if(theta >= -1.57 && theta < 1.57){
-			Tank.setLeftMotorPWM(255);
-			Tank.setRightMotorPWM(-255);
+			TankSimulation.setLeftMotorPWM(255);
+			TankSimulation.setRightMotorPWM(-255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
 		
-		}else if(theta >= 1.57 && theta <= 3.14 && theta >=3.14 && theta < -1.57){
-			Tank.setLeftMotorPWM(-255);
-			Tank.setRightMotorPWM(255);
-		}
+		}else if((theta >= 1.57 && theta <= 3.14) || (theta >=-3.14 && theta <= -1.57)){
+			TankSimulation.setLeftMotorPWM(-255);
+			TankSimulation.setRightMotorPWM(255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+		}else{
+      TankSimulation.setLeftMotorPWM(255);
+      TankSimulation.setRightMotorPWM(-255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+   }
+   
+   if((millis() -time) >= 10000){
+    TankSimulation.setLeftMotorPWM(-255);
+    TankSimulation.setRightMotorPWM(-255);
+     delay(500);
+    TankSimulation.setLeftMotorPWM(0);
+    TankSimulation.setRightMotorPWM(0);
+      return false;
+   }
+ 
 	}
 	
-	Tank.setLeftMotorPWM(0);
-	Tank.setRightMotorPWM(0);
+	TankSimulation.setLeftMotorPWM(0);
+	TankSimulation.setRightMotorPWM(0);
+  faceDown = true;
+  faceTarget = false;
+  faceRight =false;
+  faceLeft = false;
+  faceUp = false;
+
+  return true;
 }
 
 
@@ -128,32 +289,83 @@ bool facingTarget(){
 	double x_diff = destination_x- x;
 	double y_diff = destination_y- y;
 	
-	double  beta = atan2 (y_diff, x_diff);
-	bool faceTarget = false;
-	
-	if(beta >=0){
-		
-		while(fabs(theta - beta) >= 0.05){
-			Tank.setLeftMotorPWM(-255);
-			Tank.setRightMotorPWM(255);
-			location();
-		}
-		faceTarget = true;
-		
-	}else{
-		while(fabs(theta - beta) >= 0.05){
-			Tank.setLeftMotorPWM(255);
-			Tank.setRightMotorPWM(-255);
-			location();
-		}
-		faceTarget = true;
-		
+
+  if(!faceRight){
+    facingRight();
+  }
+  
+  beta = atan2 (y_diff, x_diff);
+  location();
+
+  long time = millis();
+  
+	if(beta >0){
+    
+    while(fabs(theta - beta) >= 0.05){
+      
+      TankSimulation.setLeftMotorPWM(-255);
+      TankSimulation.setRightMotorPWM(255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+      location();
+      if((millis() - time) >= 10000){
+          
+        TankSimulation.setLeftMotorPWM(0);
+        TankSimulation.setRightMotorPWM(0);
+        faceRight =false;
+        faceLeft = false;
+        faceUp = false;
+        faceDown = false;
+        faceTarget = false;
+        return false;
+      }
+      
+    }
+    faceTarget = true;
+   
+	}else if(beta <0){
+    while(fabs(theta - beta) >= 0.05){
+      
+      TankSimulation.setLeftMotorPWM(255);
+      TankSimulation.setRightMotorPWM(-255);
+      delay(25);
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+      location();
+      if((millis() -time) >= 10000){
+        
+      TankSimulation.setLeftMotorPWM(0);
+      TankSimulation.setRightMotorPWM(0);
+      faceRight =false;
+        faceLeft = false;
+        faceUp = false;
+        faceDown = false;
+        faceTarget = false;
+      return false;
+   }
+     
+    }
+    faceTarget = true;
+    
 	}
-	return faceTarget;
+
+ faceTarget = true;
+ TankSimulation.setLeftMotorPWM(0);
+ TankSimulation.setRightMotorPWM(0);
+ 
+  faceRight =false;
+  faceLeft = false;
+  faceUp = false;
+  faceDown = false;
+
+  return true;
 }
 
 bool obstacle_Detection_right(){
-	if(Tank.readDistanceSensor(2) <0.1){
+  
+	if(Enes100Simulation.readDistanceSensor(2) < 0.15){
+    
 		return true;
 	}
 	
@@ -161,7 +373,9 @@ bool obstacle_Detection_right(){
 }
 
 bool obstacle_Detection_left(){
-	if(Tank.readDistanceSensor(0) <0.1){
+  
+	if(Enes100Simulation.readDistanceSensor(0) < 0.15){
+    
 		return true;
 	}
 	
@@ -169,256 +383,294 @@ bool obstacle_Detection_left(){
 }
 
 void avoid_obstacles(){
-	if(obstacle_Detection_left()){
-		Tank.setLeftMotorPWM(0);
-		Tank.setRightMotorPWM(0);
-		location();
+  double length;
+  double width;
+  faceTarget = false;
+	if(beta >=0){
 		
-		faceTarget = false;
 		if((2- y) <=0.3){
-			facingDown();
-			if(obstacle_Detection_left() || obstacle_Detection_right()){
-				facingLeft();
-				double width = x - 0.25;
-				while(x > width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingDown();
-				double length = y - 0.55;
-				while(y > length){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingRight();
-			 	width = x + 0.25;
-				while(x < width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-			}else{
-				double length = y - 0.55;
-				while(y > length){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingRight();
-			 	double width = x + 0.25;
-				while(x < width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
+			if(facingDown()){
+  			if(obstacle_Detection_left() || obstacle_Detection_right()){
+  				if(facingLeft()){
+  				width = x - 0.25;
+  				while(x > width){
+            if(obstacle_Detection_left() || obstacle_Detection_right()){
+              break;
+            }
+  					TankSimulation.setLeftMotorPWM(255);
+  					TankSimulation.setRightMotorPWM(255);
+  					location();
+  				}
+  				TankSimulation.setLeftMotorPWM(0);
+  				TankSimulation.setRightMotorPWM(0);
+  				}
+  				if(facingDown()){
+  				length = y - 0.55;
+  				while(y > length){
+            if(obstacle_Detection_left() || obstacle_Detection_right()){
+              break;
+            }
+  					TankSimulation.setLeftMotorPWM(255);
+  					TankSimulation.setRightMotorPWM(255);
+  					location();
+  				}
+  				TankSimulation.setLeftMotorPWM(0);
+  				TankSimulation.setRightMotorPWM(0);
+  				}
+  				facingRight();
+          
+          while(obstacle_Detection_left() || obstacle_Detection_right()){
+          if(facingDown()){
+            length = y - 0.05;
+            while(y >= length){
+              if(obstacle_Detection_left()){
+                  facingRight();
+                  TankSimulation.setLeftMotorPWM(255);
+                  TankSimulation.setRightMotorPWM(255);
+                  delay(250);
+                  TankSimulation.setLeftMotorPWM(0);
+                  TankSimulation.setRightMotorPWM(0);
+                  break;
+                }
+                TankSimulation.setLeftMotorPWM(255);
+                TankSimulation.setRightMotorPWM(255);
+                location();
+              }
+            }
+             TankSimulation.setLeftMotorPWM(0);
+             TankSimulation.setRightMotorPWM(0);
+            facingRight();
+        }
+  
+        width = x + 0.25;
+        while(x < width){
+            if(obstacle_Detection_left() || obstacle_Detection_right()){
+              break;
+            }
+            TankSimulation.setLeftMotorPWM(255);
+            TankSimulation.setRightMotorPWM(255);
+            location();
+          }
+          TankSimulation.setLeftMotorPWM(0);
+          TankSimulation.setRightMotorPWM(0);
+        
+  			 	
+  			}else{
+            while(obstacle_Detection_left() || obstacle_Detection_right()){
+            if(facingDown()){
+              length = y - 0.05;
+              while(y >= length){
+                if(obstacle_Detection_left()){
+                    facingRight();
+                    TankSimulation.setLeftMotorPWM(255);
+                    TankSimulation.setRightMotorPWM(255);
+                    delay(250);
+                    TankSimulation.setLeftMotorPWM(0);
+                    TankSimulation.setRightMotorPWM(0);
+                    break;
+                  }
+                  TankSimulation.setLeftMotorPWM(255);
+                  TankSimulation.setRightMotorPWM(255);
+                  location();
+                }
+              }
+               TankSimulation.setLeftMotorPWM(0);
+               TankSimulation.setRightMotorPWM(0);
+              facingRight();
+          }
+    
+          width = x + 0.25;
+          while(x < width){
+              if(obstacle_Detection_left() || obstacle_Detection_right()){
+                break;
+              }
+              TankSimulation.setLeftMotorPWM(255);
+              TankSimulation.setRightMotorPWM(255);
+              location();
+            }
+            TankSimulation.setLeftMotorPWM(0);
+            TankSimulation.setRightMotorPWM(0);
+          
+  			}
 			}
 		}else if(y <= 0.3){
-			facingUp();
-			if(obstacle_Detection_left() || obstacle_Detection_right()){
-				facingLeft();
-				double width = x - 0.25;
-				while(x > width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingUp();
-				double length = y - 0.55;
-				while(y > length){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingRight();
-			 	width = x + 0.25;
-				while(x < width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
+			if(facingUp()){
+  			if(obstacle_Detection_left() || obstacle_Detection_right()){
+  				if(facingLeft()){
+  				width = x - 0.25;
+  				while(x > width){
+           if(obstacle_Detection_left() || obstacle_Detection_right()){
+              break;
+            }
+  					TankSimulation.setLeftMotorPWM(255);
+  					TankSimulation.setRightMotorPWM(255);
+  					location();
+  				}
+  				TankSimulation.setLeftMotorPWM(0);
+  				TankSimulation.setRightMotorPWM(0);
+  				}
+  				if(facingUp()){
+  				length = y - 0.55;
+  				while(y > length){
+            if(obstacle_Detection_left() || obstacle_Detection_right()){
+              break;
+            }
+  					TankSimulation.setLeftMotorPWM(255);
+  					TankSimulation.setRightMotorPWM(255);
+  					location();
+  				}
+  				TankSimulation.setLeftMotorPWM(0);
+  				TankSimulation.setRightMotorPWM(0);
+  				}
+				  facingRight();
+          
+          while(obstacle_Detection_left() || obstacle_Detection_right()){
+            if(facingUp()){
+              length = y + 0.05;
+              while(y <= length){
+                if(obstacle_Detection_left()){
+                    facingRight();
+                    TankSimulation.setLeftMotorPWM(255);
+                    TankSimulation.setRightMotorPWM(255);
+                    delay(250);
+                    TankSimulation.setLeftMotorPWM(0);
+                    TankSimulation.setRightMotorPWM(0);
+                    break;
+                  }
+                  TankSimulation.setLeftMotorPWM(255);
+                  TankSimulation.setRightMotorPWM(255);
+                  location();
+                }
+              }
+               TankSimulation.setLeftMotorPWM(0);
+               TankSimulation.setRightMotorPWM(0);
+              facingRight();
+          }
+    
+          width = x + 0.25;
+          while(x < width){
+              if(obstacle_Detection_left() || obstacle_Detection_right()){
+                break;
+              }
+              TankSimulation.setLeftMotorPWM(255);
+              TankSimulation.setRightMotorPWM(255);
+              location();
+            }
+            TankSimulation.setLeftMotorPWM(0);
+            TankSimulation.setRightMotorPWM(0);
+      
 			}else{
-				double length = y - 0.55;
-				while(y > length){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingRight();
-			 	double width = x + 0.25;
-				while(x < width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
+        
+				while(obstacle_Detection_left() || obstacle_Detection_right()){
+        if(facingUp()){
+          length = y + 0.05;
+          while(y <= length){
+            if(obstacle_Detection_left()){
+                facingRight();
+                TankSimulation.setLeftMotorPWM(255);
+                TankSimulation.setRightMotorPWM(255);
+                delay(250);
+                TankSimulation.setLeftMotorPWM(0);
+                TankSimulation.setRightMotorPWM(0);
+                break;
+              }
+              TankSimulation.setLeftMotorPWM(255);
+              TankSimulation.setRightMotorPWM(255);
+              location();
+            }
+          }
+           TankSimulation.setLeftMotorPWM(0);
+           TankSimulation.setRightMotorPWM(0);
+          facingRight();
+      }
+
+      width = x + 0.25;
+      while(x < width){
+          if(obstacle_Detection_left() || obstacle_Detection_right()){
+            break;
+          }
+          TankSimulation.setLeftMotorPWM(255);
+          TankSimulation.setRightMotorPWM(255);
+          location();
+        }
+        TankSimulation.setLeftMotorPWM(0);
+        TankSimulation.setRightMotorPWM(0);
+      
+			}
 			}
 			
-		}else{
-			facingDown();
-			double length = y - 0.25;
-			while(y > length){
-				Tank.setLeftMotorPWM(255);
-				Tank.setRightMotorPWM(255);
-				location();
-			}
-			Tank.setLeftMotorPWM(0);
-			Tank.setRightMotorPWM(0);
-			facingRight();
-			double width = x + 0.25;
-			while(x < width){
-				Tank.setLeftMotorPWM(255);
-				Tank.setRightMotorPWM(255);
-				location();
-			}
-			Tank.setLeftMotorPWM(0);
-			Tank.setRightMotorPWM(0);
+		}else if (beta >= 0){
+      while(obstacle_Detection_left() || obstacle_Detection_right()){
+        if(facingUp()){
+          length = y + 0.05;
+          while(y <= length){
+            if(obstacle_Detection_left()){
+                facingRight();
+                TankSimulation.setLeftMotorPWM(255);
+                TankSimulation.setRightMotorPWM(255);
+                delay(250);
+                TankSimulation.setLeftMotorPWM(0);
+                TankSimulation.setRightMotorPWM(0);
+                break;
+              }
+              TankSimulation.setLeftMotorPWM(255);
+              TankSimulation.setRightMotorPWM(255);
+              location();
+            }
+          }
+           TankSimulation.setLeftMotorPWM(0);
+           TankSimulation.setRightMotorPWM(0);
+          facingRight();
+      }
+
+      width = x + 0.25;
+      while(x < width){
+          if(obstacle_Detection_left() || obstacle_Detection_right()){
+            break;
+          }
+          TankSimulation.setLeftMotorPWM(255);
+          TankSimulation.setRightMotorPWM(255);
+          location();
+        }
+        TankSimulation.setLeftMotorPWM(0);
+        TankSimulation.setRightMotorPWM(0);
+      
+      
 		}
-	}else if(obstacle_Detection_right()){
-		Tank.setLeftMotorPWM(0);
-		Tank.setRightMotorPWM(0);
-		location();
-		
-		faceTarget = false;
-		if((2- y) <=0.3){
-			facingDown();
-			if(obstacle_Detection_left() || obstacle_Detection_right()){
-				facingLeft();
-				double width = x - 0.25;
-				while(x > width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingDown();
-				double length = y - 0.55;
-				while(y > length){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingRight();
-			 	width = x + 0.25;
-				while(x < width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-			}else{
-				double length = y - 0.55;
-				while(y > length){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingRight();
-			 	double width = x + 0.25;
-				while(x < width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-			}
-		}else if(y <= 0.3){
-			facingUp();
-			if(obstacle_Detection_left() || obstacle_Detection_right()){
-				facingLeft();
-				double width = x - 0.25;
-				while(x > width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingUp();
-				double length = y + 0.55;
-				while(y < length){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingRight();
-			    width = x + 0.25;
-				while(x < width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-			}else{
-				double length = y - 0.55;
-				while(y > length){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-				facingRight();
-			 	double width = x + 0.25;
-				while(x < width){
-					Tank.setLeftMotorPWM(255);
-					Tank.setRightMotorPWM(255);
-					location();
-				}
-				Tank.setLeftMotorPWM(0);
-				Tank.setRightMotorPWM(0);
-			}
-			
-		}else{
-			facingUp();
-			double length = y + 0.25;
-			while(y < length){
-				Tank.setLeftMotorPWM(255);
-				Tank.setRightMotorPWM(255);
-				location();
-			}
-			Tank.setLeftMotorPWM(0);
-			Tank.setRightMotorPWM(0);
-			facingRight();
-			double width = x + 0.25;
-			while(x < width){
-				Tank.setLeftMotorPWM(255);
-				Tank.setRightMotorPWM(255);
-				location();
-			}
-			Tank.setLeftMotorPWM(0);
-			Tank.setRightMotorPWM(0);
-		}
+	}else if(beta < 0){
+    while(obstacle_Detection_left() || obstacle_Detection_right()){
+          if(facingDown()){
+            length = y - 0.05;
+            while(y >= length){
+              if(obstacle_Detection_right()){
+                  facingRight();
+                  TankSimulation.setLeftMotorPWM(255);
+                  TankSimulation.setRightMotorPWM(255);
+                  delay(250);
+                  TankSimulation.setLeftMotorPWM(0);
+                  TankSimulation.setRightMotorPWM(0);
+                  break;
+                }
+                TankSimulation.setLeftMotorPWM(255);
+                TankSimulation.setRightMotorPWM(255);
+                location();
+              }
+            }
+             TankSimulation.setLeftMotorPWM(0);
+             TankSimulation.setRightMotorPWM(0);
+            facingRight();
+        }
+  
+        width = x + 0.25;
+        while(x < width){
+            if(obstacle_Detection_left() || obstacle_Detection_right()){
+              break;
+            }
+            TankSimulation.setLeftMotorPWM(255);
+            TankSimulation.setRightMotorPWM(255);
+            location();
+          }
+          TankSimulation.setLeftMotorPWM(0);
+          TankSimulation.setRightMotorPWM(0);
 	}
 }
-
