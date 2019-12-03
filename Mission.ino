@@ -14,7 +14,6 @@ int S3 = 7;
 int color = 8;
 int frequency;
 int water;
-int waterdepth;
 float duration, distance;
 double x,y,destination_x,destination_y;;
 
