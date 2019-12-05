@@ -26,7 +26,7 @@ bool forceStop;
 
 
 void setup() {
-	Enes100.begin("Aqua Terps", WATER, 15,10, 11);
+	Enes100.begin("Aqua Terps", WATER, 17,10, 11);
 
 	
 	while(!location()){
